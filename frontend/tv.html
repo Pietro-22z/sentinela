@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <meta name="viewport" content="width=x, initial-scale=1.0">
+    <style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background-color: #f4f6f9;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 100vw;
+    height: 100vh;
+
+    overflow: hidden;
+}
+
+
+/* CONTAINER PRINCIPAL */
+.tv-container {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+
+    width: 95vw;
+    height: 90vh;
+
+    gap: 18px;
+}
+
+
+/* PAINEL ESQUERDO */
+.left-panel {
+    display: flex;
+    flex-direction: column;
+
+    width: 35%;
+    height: 100%;
+
+    gap: 18px;
+}
+
+
+/* PAINEL DIREITO */
+.right-panel {
+    display: flex;
+    flex-direction: column;
+
+    width: 65%;
+    height: 100%;
+
+    gap: 18px;
+}
+
+
+/* CAIXAS */
+.box {
+    background-color: #ffffff;
+
+    border: 2px solid #c0392b;
+    border-radius: 8px;
+
+    padding: 20px;
+
+    display: flex;
+    flex-direction: column;
+
+    justify-content: center;
+    align-items: center;
+
+    text-align: center;
+
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+
+    overflow: hidden;
+}
+
+
+/* TÍTULOS */
+.box-title {
+    color: #c0392b;
+
+    font-size: 2.2vw;
+    font-weight: bold;
+
+    text-transform: uppercase;
+
+    margin-bottom: 12px;
+}
+
+
+/* GUICHÊ */
+.local-box {
+    flex: 1;
+    min-height: 0;
+}
+
+.local-number {
+    color: #c0392b;
+
+    font-size: 9vw;
+    font-weight: bold;
+
+    line-height: 1;
+}
+
+.local-type {
+    color: #555;
+
+    font-size: 1.8vw;
+    font-weight: bold;
+
+    margin-top: 6px;
+}
+
+
+/* HISTÓRICO */
+.history-box {
+    flex: 1;
+
+    justify-content: flex-start;
+    align-items: flex-start;
+
+    min-height: 0;
+}
+
+.history-box .box-title {
+    font-size: 1.8vw;
+    align-self: center;
+}
+
+#history-list {
+    list-style: none;
+
+    width: 100%;
+
+    color: #c0392b;
+
+    font-size: 1.5vw;
+    font-weight: bold;
+
+    text-align: left;
+}
+
+#history-list li {
+    margin-bottom: 8px;
+
+    border-bottom: 1px solid rgba(192, 57, 43, 0.2);
+
+    padding-bottom: 5px;
+}
+
+
+/* PACIENTE */
+.patient-box {
+    flex: 3;
+    min-height: 0;
+}
+
+.patient-name {
+    color: #c0392b;
+
+    font-size: 6.5vw;
+    font-weight: bold;
+
+    line-height: 1.2;
+
+    word-break: break-word;
+
+    max-width: 100%;
+}
+
+
+/* LOGO */
+.logo-box {
+    flex: 1;
+    min-height: 0;
+}
+
+.logo-text {
+    color: #c0392b;
+
+    font-size: 3.5vw;
+    font-weight: bold;
+
+    text-transform: uppercase;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 20px;
+}
+
+.logo-text img {
+    width: 100px;
+    height: 100px;
+
+    object-fit: contain;
+}
+
+
+/* ANIMAÇÃO */
+@keyframes flash {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
+}
+
+.flash {
+    animation: flash 0.5s ease 3;
+}
+
+</style>
+<body>
+
+    <div class="tv-container">
+
+        <!-- PAINEL ESQUERDO -->
+        <div class="left-panel">
+
+            <!-- GUICHÊ -->
+            <div class="box local-box">
+                <div class="box-title" id="local-tipo">GUICHÊ</div>
+                <div class="local-number" id="local-numero">--</div>
+            </div>
+
+            <!-- HISTÓRICO -->
+            <div class="box history-box">
+                <div class="box-title">ÚLTIMAS CHAMADAS</div>
+                <ul id="history-list"></ul>
+            </div>
+
+        </div>
+
+
+        <!-- PAINEL DIREITO -->
+        <div class="right-panel">
+
+            <!-- PACIENTE -->
+            <div class="box patient-box">
+
+                <div class="box-title">PACIENTE</div>
+
+                <div class="patient-name" id="patient-name">
+                    AGUARDANDO...
+                </div>
+
+            </div>
+
+
+            <!-- LOGO -->
+            <div class="box logo-box">
+
+                <div class="logo-text">
+                    <img src="/hospital-system/frontend/IMG/peipei.jpg">
+                    <span>Sistema Hospitalar</span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        let ultimold = null;
+
+        function atualizar() {
+
+            fetch("/tv/chamada")
+
+                .then(r => r.json())
+
+                .then(data => {
+
+                    const chamada = data.chamada;
+                    const historico = data.historico || [];
+
+
+                    if (chamada) {
+
+                        // GUICHÊ
+                        document.getElementById("local-tipo").innerText =
+                            chamada.localTipo || "GUICHÊ";
+
+                        // NÚMERO DO GUICHÊ
+                        document.getElementById("local-numero").innerText =
+                            chamada.localNumero || "--";
+
+                        // PACIENTE
+                        document.getElementById("patient-name").innerText =
+                            chamada.pacient || "AGUARDANDO...";
+
+
+                        // ANIMAÇÃO
+                        if (chamada.id !== ultimold) {
+
+                            ultimold = chamada.id;
+
+                            const patientBox =
+                                document.querySelector(".patient-box");
+
+                            patientBox.classList.remove("flash");
+
+                            void patientBox.offsetWidth;
+
+                            patientBox.classList.add("flash");
+                        }
+                    }
+
+
+                    // HISTÓRICO
+                    const list =
+                        document.getElementById("history-list");
+
+                    list.innerHTML = "";
+
+
+                    historico.slice(0, 4).forEach(h => {
+
+                        const li = document.createElement("li");
+
+                        const tipo = h.localTipo
+                            ? h.localTipo.substring(0, 4)
+                            : "GUIC";
+
+                        li.innerText =
+                            `${tipo}.${h.localNumero} - ${h.pacient}`;
+
+                        list.appendChild(li);
+
+                    });
+
+                })
+
+                .catch(err =>
+                    console.log("Erro ao buscar chamada:", err)
+                );
+        }
+
+
+        atualizar();
+
+        setInterval(atualizar, 2000);
+
+    </script>
+
+</body>
+```
